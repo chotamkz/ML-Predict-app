@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package proto;
+
+service PredictionService {
+  rpc Predict(PredictionRequest) returns (PredictionResponse);
+}
+
+message PredictionRequest {
+  int32 operating_system = 1;
+  int32 analysis_of_algorithm = 2;
+  int32 programming_concept = 3;
+  int32 software_engineering = 4;
+  int32 computer_network = 5;
+  int32 applied_mathematics = 6;
+  int32 computer_security = 7;
+  int32 hackathons_attended = 8;
+  string topmost_certification = 9;
+  string personality = 10;
+  string management_technical = 11;
+  string leadership = 12;
+  string team = 13;
+  string self_ability = 14;
+}
+
+message PredictionResponse {
+  string predicted_track = 1;
+}
