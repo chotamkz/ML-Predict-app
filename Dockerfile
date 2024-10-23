@@ -16,6 +16,9 @@ RUN python -m grpc_tools.protoc -I./proto --python_out=./proto --grpc_python_out
 
 COPY . .
 
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
 EXPOSE 5001
 
-CMD ["python", "main.py"]
+CMD ["./entrypoint.sh"]

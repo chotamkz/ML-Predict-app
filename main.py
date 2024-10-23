@@ -7,6 +7,8 @@ import grpc
 
 import sys
 
+from grpc_reflection.v1alpha import reflection
+
 sys.path.append("./proto")
 from proto import prediction_pb2_grpc, prediction_pb2
 
@@ -21,6 +23,7 @@ yes_no_encoder = joblib.load('models/yes_no_encoder.pkl')
 
 class PredictionServiceServicer(prediction_pb2_grpc.PredictionServiceServicer):
     def Predict(self, request, context):
+        print("получен запрос")
         try:
             features = [
                 request.operating_system,
@@ -52,6 +55,14 @@ class PredictionServiceServicer(prediction_pb2_grpc.PredictionServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     prediction_pb2_grpc.add_PredictionServiceServicer_to_server(PredictionServiceServicer(), server)
+
+    SERVICE_NAMES = (
+        prediction_pb2.DESCRIPTOR.services_by_name['PredictionService'].full_name,
+        reflection.SERVICE_NAME,
+    )
+    reflection.enable_server_reflection(SERVICE_NAMES, server)
+
+
     server.add_insecure_port('[::]:5001')
     server.start()
     server.wait_for_termination()
