@@ -1,17 +1,18 @@
+import asyncio
+import logging
 from concurrent import futures
-
 from flask import Flask
 import joblib
 import numpy as np
 import grpc
-
 import sys
-
 from grpc_reflection.v1alpha import reflection
+from grpc.aio import server as aio_server
 
 sys.path.append("./proto")
 from proto import prediction_pb2_grpc, prediction_pb2
 
+logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 
 model = joblib.load('models/student_track_prediction_model.pkl')
@@ -22,7 +23,7 @@ yes_no_encoder = joblib.load('models/yes_no_encoder.pkl')
 
 
 class PredictionServiceServicer(prediction_pb2_grpc.PredictionServiceServicer):
-    def Predict(self, request, context):
+    async def Predict(self, request, context):
         print("получен запрос")
         try:
             features = [
@@ -47,13 +48,14 @@ class PredictionServiceServicer(prediction_pb2_grpc.PredictionServiceServicer):
 
             return prediction_pb2.PredictionResponse(predicted_track=prediction[0])
         except Exception as e:
-            context.set_details(str(e))
+            logging.error(f"Ошибка при обработке запроса: {e}")
+            context.set_details("Ошибка при обработке запроса.")
             context.set_code(grpc.StatusCode.INTERNAL)
             return prediction_pb2.PredictionResponse()
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+async def serve():
+    server = aio_server(futures.ProcessPoolExecutor(max_workers=10))
     prediction_pb2_grpc.add_PredictionServiceServicer_to_server(PredictionServiceServicer(), server)
 
     SERVICE_NAMES = (
@@ -62,15 +64,19 @@ def serve():
     )
     reflection.enable_server_reflection(SERVICE_NAMES, server)
 
-
     server.add_insecure_port('[::]:5001')
-    server.start()
-    server.wait_for_termination()
+    await server.start()
+    await server.wait_for_termination()
+
+
+async def main():
+    await serve()
 
 
 if __name__ == '__main__':
     print("Server-ml started")
-    serve()
+    asyncio.run(main())
+
 # docker build -t ml-api .
 # docker run -d -p 5001:5001 ml-api
-#python -m grpc_tools.protoc -I./proto --python_out=./proto --grpc_python_out=./proto ./proto/prediction.proto
+# python -m grpc_tools.protoc -I./proto --python_out=./proto --grpc_python_out=./proto ./proto/prediction.proto

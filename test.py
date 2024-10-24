@@ -1,7 +1,7 @@
 import sys
 
 import grpc
-sys.path.append("./proto")
+sys.path.append("proto")
 from proto import prediction_pb2_grpc, prediction_pb2
 
 def run():
