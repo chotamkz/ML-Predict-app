@@ -112,7 +112,7 @@ async def serve(model_container: ModelContainer):
     )
     reflection.enable_server_reflection(service_names, server)
 
-    server_addr = f'[::]:{settings.SERVER_PORT}'
+    server_addr = f'[::]:{settings.PORT}'
     server.add_insecure_port(server_addr)
 
     logger.info(f"Запуск сервера на {server_addr}")
@@ -136,3 +136,7 @@ if __name__ == '__main__':
 # docker build -t ml-api .
 # docker run -d -p 5001:5001 ml-api
 # python -m grpc_tools.protoc -I./proto --python_out=./proto --grpc_python_out=./proto ./proto/prediction.proto
+
+# how to push in dockerhub
+# docker tag local-image-name myusername/track-backend:latest
+# docker push myusername/track-backend:latest

@@ -5,7 +5,7 @@ from pathlib import Path
 class Settings(BaseSettings):
     MODELS_DIR: Path
 
-    SERVER_PORT: int
+    PORT: int
     MAX_WORKERS: int
 
     CACHE_TTL: int
