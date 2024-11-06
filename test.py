@@ -5,7 +5,7 @@ sys.path.append("proto")
 from proto import prediction_pb2_grpc, prediction_pb2
 
 def run():
-    with grpc.insecure_channel('localhost:5001') as channel:
+    with grpc.insecure_channel('https://ml-predict-app.onrender.com') as channel:
         stub = prediction_pb2_grpc.PredictionServiceStub(channel)
 
         # Создаем запрос
